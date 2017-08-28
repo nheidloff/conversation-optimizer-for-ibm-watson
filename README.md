@@ -13,9 +13,9 @@ Filters:
 
 Try out the [online](https://conversation-optimizer-for-ibm-watson.mybluemix.net/) version yourself.
 
-Check out the [screenshots](https://github.com/nheidloff/conversations-analyser-for-ibm-watson/tree/master/screenshots) for more details. This is the view with all conversations:
+Check out the [screenshots](https://github.com/nheidloff/conversations-optimizer-for-ibm-watson/tree/master/screenshots) for more details. This is the view with all conversations:
 
-![alt text](https://github.com/nheidloff/conversations-analyser-for-ibm-watson/raw/master/screenshots/all.png "Conversation Optimizer for IBM Watson")
+![alt text](https://github.com/nheidloff/conversations-optimizer-for-ibm-watson/raw/master/screenshots/all.png "Conversation Optimizer for IBM Watson")
 
 Authors: 
 
