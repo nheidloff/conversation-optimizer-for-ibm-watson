@@ -1,6 +1,6 @@
 ---
 applications:
-- host: conversation-optimizer-for-ibm-watson #-${random-word}
+- host: conversation-optimizer-for-ibm-watson-${random-word}
   name: conversation-optimizer-for-ibm-watson
   memory: 256M
   path: ../dist/
