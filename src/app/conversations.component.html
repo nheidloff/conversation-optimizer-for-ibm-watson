@@ -1,0 +1,186 @@
+<div class="row">
+	<div class="col-lg-12">
+		<div style="display: table">
+			<div style="display: table-row">
+				<div style="display: table-cell">
+					<h2 class="page-header" style="border-bottom:none; margin-bottom:0px">
+						<i class="fa fa-list-ul" aria-hidden="true"></i>&nbsp;
+					</h2>
+				</div>
+				<div style="display: table-cell">
+					<h2 class="page-header" style="border-bottom:none; margin-bottom:0px">Conversation Optimizer</h2>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<hr style="margin-top: 0px;">
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div *ngIf="getWatsonConversationLogsStatus() == 'logs-not-read'" style="display: table;width:100%;">
+					<div style="display: table-row;width:100%;height: 55px;">
+						<div style="display: table-cell;width:50%;padding-right: 20px;">
+							<div *ngIf="getWatsonConversationLogsStatus() == 'logs-not-read'">
+								<span *ngIf="getWatsonConversationConfigStatus() == 'unknown'" class="alert alert-warning form-control" style="height: 100%;margin-bottom: 1px;">Configuration: Unknown Status</span>
+								<span *ngIf="getWatsonConversationConfigStatus() == 'incomplete'" class="alert alert-warning form-control" style="height: 100%;margin-bottom: 1px;">Configuration: Incomplete</span>
+								<span *ngIf="getWatsonConversationConfigStatus() == 'credentials-syntactially-correct'" class="alert alert-warning form-control"
+								 style="height: 100%;margin-bottom: 1px;">Configuration: Missing Workspace</span>
+								<span *ngIf="getWatsonConversationConfigStatus() == 'complete'" class="alert alert-warning form-control" style="height: 100%;margin-bottom: 1px;">Configuration: Complete, but logs haven't been read <a (click)="readLogs()" class="btn btn-primary" style="margin-right: 8px;">Read Logs ...</a></span>
+								<span *ngIf="getWatsonConversationConfigStatus() == 'validated'" class="alert alert-warning form-control" style="height: 100%;margin-bottom: 1px;">Configuration: Valid, but logs haven't been read <a (click)="readLogs()" class="btn btn-primary" style="margin-right: 8px;">Read Logs ...</a></span>
+								<span *ngIf="getWatsonConversationConfigStatus() == 'invalid'" class="alert alert-warning form-control" style="height: 100%;margin-bottom: 1px;">Configuration: Invalid</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div *ngIf="getWatsonConversationLogsStatus() == 'logs-read'">
+					<div class="btn-group" role="group" aria-label="...">
+						<button type="button" (click)="applyFilter('everything')" class="btn btn-default">All</button>
+						<button type="button" (click)="applyFilter('log-messages')" class="btn btn-default">Dialog Errors</button>
+						<button type="button" (click)="applyFilter('unfulfilled-intents')" class="btn btn-default">Unfulfilled Intents</button>
+						<button type="button" (click)="applyFilter('unconfident-intents')" class="btn btn-default">Unconfident Intents</button>
+						<button type="button" (click)="applyFilter('out-of-scope-intents')" class="btn btn-default">Out of Scope</button>
+					</div>
+					<h3 *ngIf="getFilter() == 'everything'" class="page-header" style="border-bottom:none; margin-bottom:0px">All Conversations (sorted chronologically)</h3>
+					<div *ngIf="getFilter() == 'log-messages'">
+						<h3 class="page-header" style="border-bottom:none; margin-bottom:0px">Conversations with Dialog Errors (sorted chronologically)</h3>
+						<br> This view shows conversations with <a href="https://watson-developer-cloud.github.io/dotnet-standard-sdk/docs/development/html/d6/d02/class_i_b_m_1_1_watson_developer_cloud_1_1_conversation_1_1v1_1_1_model_1_1_runtime_output.html#affcff74917f9be477c0dbc09ba38ea2e"
+						 target="_blank">log messages</a> which indicate errors in the dialog definition.
+						<br>
+					</div>
+					<div *ngIf="getFilter() == 'unfulfilled-intents'">
+						<h3 class="page-header" style="border-bottom:none; margin-bottom:0px">Conversations with unfulfilled Intents (sorted chronologically)</h3>
+						<br> Developers can mark intents as being fulfilled when certain
+					nodes in the dialogs are reached. This way intents that have been triggered but not fulfilled can be detected.
+					<br><br>
+						For this feature to work you need to add information to the JSON of your dialog nodes:<br><br>
+						<ul>
+							<li>Add '"output.intentTriggered" : "your-intent-name"' to the node when the intent is triggered</li>
+							<li>Add '"output.intentFulfilled" : "your-intent-name"' to the node when the intent is fulfilled</li>
+						</ul>
+					</div>
+					<div *ngIf="getFilter() == 'out-of-scope-intents'">
+						<h3 class="page-header" style="border-bottom:none; margin-bottom:0px">Conversations with Out Of Scope User Phrases (sorted chronologically)</h3>
+						<br> This view shows conversations in which users asked for something the bot couldn't handle.
+						<br><br>
+						For this feature to work you need to add information to the JSON of certain dialog nodes:<br><br>
+						<ul>
+							<li>Add '"output.outOfScope" : "&lt;? input.text ?&gt;"' to the nodes when the user input is out of scope. These are typically
+								the nodes with the 'anything_else' condition.</li>
+						</ul>
+					</div>
+					<div *ngIf="getFilter() == 'unconfident-intents'">
+						<h3 class="page-header" style="border-bottom:none; margin-bottom:0px">Conversations with unconfident Intents (sorted chronologically)</h3>
+						<br> This view shows all conversations with intents that have less than 50% confidence.
+						<br>
+					</div>
+					<br>
+					<br>
+				</div>
+				<div *ngIf="getFilter() == 'all-issues'">
+					Not implemented yet<br><br>
+				</div>
+				<div *ngIf="(getFilter() != 'all-issues')">
+					<div *ngIf="(conversations$ | async)?.length > 0">
+						<div *ngFor="let conversation of conversations$ | async;let i=index">
+							<div *ngIf="(getFilter() == 'everything') || ((getFilter() == 'log-messages') && (hasConversationLogMessages(conversation) == true))
+								|| ((getFilter() == 'unfulfilled-intents') && (hasConversationUnfulfilledIntents(conversation) == true))
+								|| ((getFilter() == 'unconfident-intents') && (hasConversationUnconfidentIntents(conversation) == true))
+								|| ((getFilter() == 'out-of-scope-intents') && (hasConversationOutOfScopeIntents(conversation) == true))" class="list-group">
+								<div style="display: table;width:100%">
+									<div style="display: table-row">
+										<div style="display: table-cell">
+											<a (click)="onOpenConversation(conversation.id)" class="list-group-item">
+												<div style="display: table;width:100%">
+													<div style="display: table-row">
+														<div style="display: table-cell;width:450px">
+															<h4 style="margin-bottom: 10px" class="list-group-item-heading">ID: {{ conversation.id }}</h4>
+															<p class="list-group-item-text">Date: {{ conversation.endDate | amTimeAgo }} ({{ conversation.endDate | amCalendar }})</p>
+															<p class="list-group-item-text">Duration: {{ conversation.duration }} seconds</p>
+														</div>
+														<div style="display: table-cell">
+															User: {{ conversation.logs[0].request.input.text }}
+															<br> Watson: {{ conversation.logs[0].response.output.text[0] }}
+															<br>
+															<div *ngIf="conversation.logs.length > 1">
+																User: {{ conversation.logs[1].request.input.text }}
+																<br> Watson: ...
+																<br>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div *ngIf="hasConversationLogMessages(conversation) == true">
+													<br>
+													<div class="alert alert-warning" style="margin-bottom: 1px;">
+														This conversation has dialog errors
+													</div>
+												</div>
+												<div *ngIf="hasConversationUnfulfilledIntents(conversation) == true">
+													<br>
+													<div class="alert alert-warning" style="margin-bottom: 1px;">
+														This conversation has unfulfilled intents
+													</div>
+												</div>
+												<div *ngIf="hasConversationOutOfScopeIntents(conversation) == true">
+													<br>
+													<div class="alert alert-warning" style="margin-bottom: 1px;">
+														This conversation has out of scope user phrases
+													</div>
+												</div>
+												<div *ngIf="hasConversationUnconfidentIntents(conversation) == true">
+													<br>
+													<div class="alert alert-warning" style="margin-bottom: 1px;">
+														This conversation has unconfident intents
+													</div>
+												</div>
+											</a>
+										</div>
+									</div>
+								</div>
+								<br>
+							</div>
+						</div>
+						<div *ngIf="(getFilter() == 'log-messages') && (haveConversationsLogMessages() == false)">
+							<div>There are no conversations with dialog errors</div>
+						</div>
+						<div *ngIf="(getFilter() == 'unfulfilled-intents') && (haveConversationsUnfulfilledIntents() == false)">
+							<div>There are no conversations with unfulfilled intents</div>
+						</div>
+						<div *ngIf="(getFilter() == 'out-of-scope-intents') && (haveConversationsOutOfScopeIntents() == false)">
+							<div>There are no conversations with out of scope user phrases</div>
+						</div>
+						<div *ngIf="(getFilter() == 'out-of-scope-intents') && (haveConversationsUnconfidentIntents() == false)">
+							<div>There are no conversations with unconfident intents</div>
+						</div>
+					</div>
+				</div>
+				<div *ngIf="getWatsonConversationLogsStatus() == 'logs-read'">
+					<br>
+					<br>
+					<a style="margin-left: 8px;" (click)="downloadConversations()" class="btn btn-default">Download Logs</a>
+				</div>
+			</div>
+			<br>
+		</div>
+	</div>
+</div>
+
+<div *ngIf="userInterfaceDisabled$ | async" class="modal fade in" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+ style="display:block">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modalTitle">Conversation Optimizer</h4>
+			</div>
+			<div class="modal-body" id="sdlConfirmDeleteText">
+				<div style="display:flex">
+					<i class="loading-icon fa fa-spinner fa-pulse fa-3x fa-fw" style="width: inherit;margin-top: 0; margin-right:10px"></i>
+					<div style="font-size: larger;margin-top: 10px;">{{ userInterfaceDisabledText$ | async }}</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,100 @@
+<div class="row">
+	<div class="col-lg-12">
+		<div style="display: table">
+			<div style="display: table-row">
+				<div style="display: table-cell">
+					<h2 class="page-header" style="border-bottom:none; margin-bottom:0px">
+						<i class="fa fa-cog" aria-hidden="true"></i>&nbsp;
+					</h2>
+				</div>
+				<div style="display: table-cell">
+					<h2 class="page-header" style="border-bottom:none; margin-bottom:0px">Configuration</h2>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+<hr style="margin-top: 0px;">
+<div class="row">
+	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+		<form role="form" [formGroup]="skillOverviewForm">
+			<fieldset [disabled]="userInterfaceDisabled$ | async">
+				<div id="anchorDescription"></div>
+				<div class="panel panel-default">
+					<br> You need to have a <a href="https://console.bluemix.net/catalog/services/conversation" target="_blank">Watson Conversation</a>					service and a workspace.
+					<br>
+					<br> When this app has been deployed to Bluemix and a Watson Conversation service has been bound to it, the Watson user
+					name and password are read from the environment. If not you need to copy and paste the user name and password from the
+					Watson Conversation dashboard.
+					<br><br>
+					<button style="margin-right: 8px;" (click)="openWatsonServices()" class="btn btn-default">Open Watson Services <i class="fa fa-external-link" aria-hidden="true"></i></button>
+					<br><br><br>					
+					<div *ngIf="getWatsonConversationConfigStatus() == 'invalid'">
+						<span class="alert alert-warning form-control" style="height: 100%;margin-bottom: 1px;">Configuration: Conversation service could not be accessed.</span>
+						<br><br>
+					</div>
+					<div class="form-group">
+						<label>User Name</label>
+						<div *ngIf="vcapCredentialsExist() == false">
+							<input [value]="watsonUserName$ | async" (blur)="onBlurWatsonUserName($event)" (keyup)="onKeyUpWatsonUserName($event)" class="form-control"
+							 id="watsonUserName" />
+							<div *ngIf="(validationErrorsUserName$ | async)?.length > 0" class="alert alert-warning">
+								{{ (validationErrorsUserName$ | async)[0].displayText }}
+							</div>
+						</div>
+						<div *ngIf="vcapCredentialsExist() == true">
+							<input class="form-control" disabled value="Read from Bluemix Application (VCAP Variable)" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Password</label>
+						<div *ngIf="vcapCredentialsExist() == false">
+							<input [value]="watsonPassword$ | async" (blur)="onBlurWatsonPassword($event)" (keyup)="onKeyUpWatsonPassword($event)" class="form-control"
+							 id="watsonPassword" />
+							<div *ngIf="(validationErrorsPassword$ | async)?.length > 0" class="alert alert-warning">
+								{{ (validationErrorsPassword$ | async)[0].displayText }}
+							</div>
+						</div>
+						<div *ngIf="vcapCredentialsExist() == true">
+							<input class="form-control" disabled value="Read from Bluemix Application (VCAP Variable)" />
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Workspace</label>
+						<select id="workspaces" class="form-group form-control" style="margin-bottom: 0px;" (change)="onChangeWorkspace($event)"
+						 (focus)="onFocusWorkspace($event)">	
+							<option *ngFor="let workspace of (workspaces$ | async);" [attr.selected]="isSelectedOption(workspace.workspace_id)" [value]="workspace.workspace_id">{{ workspace.name }}</option>							
+						</select>
+						<div *ngIf="(validationErrorsWorkspace$ | async)?.length > 0" class="alert alert-warning">
+							{{ (validationErrorsWorkspace$ | async)[0].displayText }}
+						</div>
+					</div>
+				</div>
+				<br><br>
+				<button *ngIf="isWatsonConfigurationValid() == false" disabled style="margin-right: 8px;" class="btn btn-primary">Read Logs ...</button>
+				<a *ngIf="isWatsonConfigurationValid() == true" (click)="readLogs()" class="btn btn-primary"
+				 style="margin-right: 8px;">
+					Read Logs ...
+				</a>
+			</fieldset>
+		</form>
+	</div>
+</div>
+
+<div *ngIf="userInterfaceDisabled$ | async" class="modal fade in" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="modalTitle"
+    style="display:block">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="modalTitle">Conversation Optimizer</h4>
+            </div>
+            <div class="modal-body" id="sdlConfirmDeleteText">
+                <div style="display:flex">
+                    <i class="loading-icon fa fa-spinner fa-pulse fa-3x fa-fw" style="width: inherit;margin-top: 0; margin-right:10px"></i>
+                    <div style="font-size: larger;margin-top: 10px;">{{ userInterfaceDisabledText$ | async }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
